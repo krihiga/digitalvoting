@@ -1,0 +1,78 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:text="Verify Voter"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#2E3A59"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Enter Voter ID -->
+        <EditText
+            android:id="@+id/etVoterId"
+            android:hint="Enter Voter ID"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Verify Button -->
+        <Button
+            android:id="@+id/btnVerify"
+            android:text="🔍 Verify Voter"
+            android:textAllCaps="false"
+            android:backgroundTint="#03A9F4"
+            android:textColor="@android:color/white"
+            android:padding="14dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- Voter Details -->
+        <TextView
+            android:id="@+id/tvName"
+            android:text="Name: "
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tvId"
+            android:text="ID: "
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Voter Image -->
+        <ImageView
+            android:id="@+id/imgPhoto"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerCrop"
+            android:background="@android:color/darker_gray"
+            android:src="@mipmap/ic_launcher_round"/>
+    </LinearLayout>
+</ScrollView>

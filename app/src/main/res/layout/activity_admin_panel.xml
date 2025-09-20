@@ -1,0 +1,56 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:gravity="center"
+    android:background="#FAFAFA"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:text="Secure Voting System"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="#2E3A59"
+        android:layout_marginBottom="60dp"
+        android:gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!-- Register Voter -->
+    <Button
+        android:id="@+id/btnGoRegister"
+        android:text="📝 Register Voter"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/rounded_button_green" />
+
+    <!-- Verify Voter -->
+    <Button
+        android:id="@+id/btnGoVerify"
+        android:text="🔍 Verify Voter"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/rounded_button_blue" />
+
+    <!-- Admin / Result Panel -->
+    <Button
+        android:id="@+id/btnGoResults"
+        android:text="📊 Result Panel"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_button_orange" />
+
+</LinearLayout>

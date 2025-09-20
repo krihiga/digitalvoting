@@ -1,0 +1,89 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    android:background="#F5F5F5">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal">
+
+        <!-- Capture Face -->
+        <Button
+            android:id="@+id/btnCaptureFace"
+            android:text="📷 Capture Face"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#2196F3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Face Preview -->
+        <ImageView
+            android:id="@+id/facePreview"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_marginTop="20dp"
+            android:contentDescription="Face preview"
+            android:scaleType="centerCrop"
+            android:background="@android:color/darker_gray"
+            android:padding="4dp" />
+
+        <!-- Voter ID Display -->
+        <TextView
+            android:id="@+id/tvVoterId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Voter ID: "
+            android:textSize="18sp"
+            android:textColor="#2E3A59"
+            android:layout_marginTop="12dp"
+            android:textStyle="bold" />
+
+        <!-- Candidate Selection -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Candidate:"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:textColor="#000000" />
+
+        <RadioGroup
+            android:id="@+id/radioGroupCandidates"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp">
+
+            <RadioButton
+                android:text="ADMK"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:text="DMK"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:text="TVK"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </RadioGroup>
+
+        <!-- Cast Vote -->
+        <Button
+            android:id="@+id/btnCastVote"
+            android:text="🗳️ Cast Vote"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#4CAF50"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp" />
+
+    </LinearLayout>
+</ScrollView>

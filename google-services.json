@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "687831793554",
+    "firebase_url": "https://digital-vote-97d97-default-rtdb.firebaseio.com",
+    "project_id": "digital-vote-97d97",
+    "storage_bucket": "digital-vote-97d97.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:687831793554:android:2a1f177b75025708424b4b",
+        "android_client_info": {
+          "package_name": "com.busyorder.digitalvoting"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGviHpm4ydLi-eoAYaSQ55FXeTXWb_HkI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

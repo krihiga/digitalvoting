@@ -1,47 +1,98 @@
 package com.busyorder.digitalvoting
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.busyorder.digitalvoting.ui.theme.DigitalvotingTheme
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.*
+import java.util.concurrent.TimeUnit
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+    private lateinit var auth: FirebaseAuth
+    private lateinit var etPhone: EditText
+    private lateinit var etOtp: EditText
+    private lateinit var btnSendOtp: Button
+    private lateinit var btnVerifyOtp: Button
+
+    private var verificationId: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            DigitalvotingTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+        setContentView(R.layout.activity_main)  // simple layout for phone + OTP
+
+        auth = FirebaseAuth.getInstance()
+
+        etPhone = findViewById(R.id.etPhone)
+        etOtp = findViewById(R.id.etOtp)
+        btnSendOtp = findViewById(R.id.btnSendOtp)
+        btnVerifyOtp = findViewById(R.id.btnVerifyOtp)
+
+        // Step 1: Send OTP
+        btnSendOtp.setOnClickListener {
+            val phone = etPhone.text.toString().trim()
+            if (phone.isNotEmpty()) {
+                sendOtp(phone)
+            } else {
+                Toast.makeText(this, "Enter phone number", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Step 2: Verify OTP
+        btnVerifyOtp.setOnClickListener {
+            val otp = etOtp.text.toString().trim()
+            if (otp.isNotEmpty() && verificationId != null) {
+                verifyOtp(otp)
+            } else {
+                Toast.makeText(this, "Enter OTP", Toast.LENGTH_SHORT).show()
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    private fun sendOtp(phone: String) {
+        val options = PhoneAuthOptions.newBuilder(auth)
+            .setPhoneNumber(phone)       // Must include country code, e.g. +91xxxxxxxxxx
+            .setTimeout(60L, TimeUnit.SECONDS)
+            .setActivity(this)
+            .setCallbacks(object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                    // Auto verification success
+                    signInWithCredential(credential)
+                }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    DigitalvotingTheme {
-        Greeting("Android")
+                override fun onVerificationFailed(e: FirebaseException) {
+                    Toast.makeText(this@MainActivity, "Failed: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+
+                override fun onCodeSent(vid: String, token: PhoneAuthProvider.ForceResendingToken) {
+                    super.onCodeSent(vid, token)
+                    verificationId = vid
+                    Toast.makeText(this@MainActivity, "OTP Sent", Toast.LENGTH_SHORT).show()
+                }
+            })
+            .build()
+        PhoneAuthProvider.verifyPhoneNumber(options)
+    }
+
+    private fun verifyOtp(otp: String) {
+        val credential = PhoneAuthProvider.getCredential(verificationId!!, otp)
+        signInWithCredential(credential)
+    }
+
+    private fun signInWithCredential(credential: PhoneAuthCredential) {
+        auth.signInWithCredential(credential).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(this, "Phone Verified!", Toast.LENGTH_SHORT).show()
+
+                // ✅ Open PanelChooserActivity after verification
+                val intent = Intent(this, PanelChooserActivity::class.java)
+                startActivity(intent)
+                finish()
+            } else {
+                Toast.makeText(this, "OTP Verification failed", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

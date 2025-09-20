@@ -49,7 +49,7 @@ class RegisterActivity : AppCompatActivity() {
         imagePreview = findViewById(R.id.imagePreview)
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.busy-order.com/") // your backend
+            .baseUrl("https://digital-vote-97d97-default-rtdb.firebaseio.com/") // your backend
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         api = retrofit.create(ApiService::class.java)

@@ -55,7 +55,7 @@ class UserVoteActivity : AppCompatActivity() {
         tvVoterId = findViewById(R.id.tvVoterId)
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.busy-order.com/") // Flask backend (for face verification)
+            .baseUrl("https://digital-vote-97d97-default-rtdb.firebaseio.com/") // Flask backend (for face verification)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         api = retrofit.create(ApiService::class.java)

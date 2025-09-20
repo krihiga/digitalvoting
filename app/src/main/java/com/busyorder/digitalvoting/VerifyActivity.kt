@@ -27,7 +27,7 @@ class VerifyActivity : AppCompatActivity() {
         photoImg = findViewById(R.id.imgPhoto)
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.84.88.187:5000/")
+            .baseUrl("https://digitalvoting.onrender.com")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         api = retrofit.create(ApiService::class.java)

@@ -9,12 +9,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.firebase.database.FirebaseDatabase
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
 import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
@@ -31,6 +29,8 @@ class UserVoteActivity : AppCompatActivity() {
     private var faceBitmap: Bitmap? = null
     private var voterId: String? = null   // filled after verification
 
+    private val dbRef by lazy { FirebaseDatabase.getInstance().getReference("votes") }
+
     // Camera capture launcher
     private val takePicture =
         registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
@@ -38,7 +38,7 @@ class UserVoteActivity : AppCompatActivity() {
                 faceBitmap = bitmap
                 facePreview.setImageBitmap(bitmap)
                 Toast.makeText(this, "Face captured ✅ Verifying...", Toast.LENGTH_SHORT).show()
-                verifyFace(bitmap)   // 🔥 Auto verify
+                verifyFace(bitmap)   // 🔥 Auto verify voter
             } else {
                 Toast.makeText(this, "Failed to capture face", Toast.LENGTH_SHORT).show()
             }
@@ -55,7 +55,7 @@ class UserVoteActivity : AppCompatActivity() {
         tvVoterId = findViewById(R.id.tvVoterId)
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.busy-order.com/") // Flask backend
+            .baseUrl("https://api.busy-order.com/") // Flask backend (for face verification)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         api = retrofit.create(ApiService::class.java)
@@ -88,7 +88,6 @@ class UserVoteActivity : AppCompatActivity() {
             val reqFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
             val body = MultipartBody.Part.createFormData("image", file.name, reqFile)
 
-            // 🚫 Do NOT send voter_id here, let server detect it
             api.verifyWithoutId(body).enqueue(object : Callback<VerifyResponse> {
                 override fun onResponse(call: Call<VerifyResponse>, response: Response<VerifyResponse>) {
                     val resp = response.body()
@@ -135,33 +134,19 @@ class UserVoteActivity : AppCompatActivity() {
         val selectedBtn = findViewById<RadioButton>(selectedId)
         val voteText = selectedBtn.text.toString()
 
-        // Encrypt vote
-        val encryptedVoteObj = CryptoUtils.encrypt(voteText)
+        // ✅ Save vote to Firebase Realtime Database
+        val voteData = mapOf(
+            "voterId" to voterId,
+            "vote" to voteText,
+            "timestamp" to System.currentTimeMillis()
+        )
 
-        val payload = JSONObject()
-        payload.put("voter_id", voterId)   // ✅ verified voterId
-        payload.put("encrypted_vote", encryptedVoteObj)
-
-        val body: RequestBody =
-            payload.toString().toRequestBody("application/json".toMediaTypeOrNull())
-
-        api.castVote(body).enqueue(object : Callback<ApiResponse> {
-            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                if (!response.isSuccessful) {
-                    Toast.makeText(this@UserVoteActivity, "❌ You have already Voted: ${response.code()}", Toast.LENGTH_LONG).show()
-                    return
-                }
-                val resp = response.body()
-                if (resp?.ok == true) {
-                    Toast.makeText(this@UserVoteActivity, "✅ Vote cast! Hash: ${resp.vote_hash}", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(this@UserVoteActivity, "❌ Error: ${resp?.error}", Toast.LENGTH_LONG).show()
-                }
+        dbRef.child(voterId!!).setValue(voteData)
+            .addOnSuccessListener {
+                Toast.makeText(this, "✅ Vote saved", Toast.LENGTH_LONG).show()
             }
-
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                Toast.makeText(this@UserVoteActivity, "⚠️ Network error: ${t.message}", Toast.LENGTH_LONG).show()
+            .addOnFailureListener {
+                Toast.makeText(this, "❌ Failed to save vote: ${it.message}", Toast.LENGTH_LONG).show()
             }
-        })
     }
 }

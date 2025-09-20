@@ -1,5 +1,3 @@
-val org.gradle.accessors.dm.LibrariesForLibs.firebase: kotlin.Any
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -49,6 +47,8 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.functions)
+    implementation(libs.firebase.database)
+
 
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 

@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.*
+import com.google.firebase.database.FirebaseDatabase
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
@@ -21,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)  // simple layout for phone + OTP
+        setContentView(R.layout.activity_main)
 
         auth = FirebaseAuth.getInstance()
 
@@ -84,12 +85,32 @@ class MainActivity : AppCompatActivity() {
     private fun signInWithCredential(credential: PhoneAuthCredential) {
         auth.signInWithCredential(credential).addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                Toast.makeText(this, "Phone Verified!", Toast.LENGTH_SHORT).show()
+                val user = auth.currentUser
+                val phone = user?.phoneNumber ?: ""
+                val uid = user?.uid ?: ""
 
-                // ✅ Open PanelChooserActivity after verification
-                val intent = Intent(this, PanelChooserActivity::class.java)
-                startActivity(intent)
-                finish()
+                // ✅ Save to Realtime Database
+                val dbRef = FirebaseDatabase.getInstance().getReference("users")
+                val userData = mapOf(
+                    "uid" to uid,
+                    "phone" to phone
+                )
+
+                dbRef.child(uid).setValue(userData)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Phone Verified & Saved!", Toast.LENGTH_SHORT).show()
+
+                        // Open PanelChooserActivity
+                        val intent = Intent(this, PanelChooserActivity::class.java)
+                        intent.putExtra("uid", uid)
+                        intent.putExtra("phone", phone)
+                        startActivity(intent)
+                        finish()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "Failed to save: ${it.message}", Toast.LENGTH_LONG).show()
+                    }
+
             } else {
                 Toast.makeText(this, "OTP Verification failed", Toast.LENGTH_SHORT).show()
             }

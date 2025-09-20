@@ -1,6 +1,5 @@
 package com.busyorder.digitalvoting
 
-
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -12,6 +11,8 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import retrofit2.*
@@ -28,6 +29,9 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var imagePreview: ImageView
     private var imageFile: File? = null
 
+    private lateinit var auth: FirebaseAuth
+    private val dbRef by lazy { FirebaseDatabase.getInstance().getReference("voters") }
+
     companion object {
         const val PICK_IMAGE = 101
     }
@@ -36,6 +40,8 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
+        auth = FirebaseAuth.getInstance()
+
         nameEt = findViewById(R.id.etName)
         voterIdEt = findViewById(R.id.etVoterId)
         selectBtn = findViewById(R.id.btnSelectImage)
@@ -43,7 +49,7 @@ class RegisterActivity : AppCompatActivity() {
         imagePreview = findViewById(R.id.imagePreview)
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.busy-order.com/") // ✅ your system IP
+            .baseUrl("https://api.busy-order.com/") // your backend
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         api = retrofit.create(ApiService::class.java)
@@ -75,8 +81,25 @@ class RegisterActivity : AppCompatActivity() {
                 val body = resp.body()
                 if (resp.isSuccessful && body?.ok == true) {
                     Toast.makeText(this@RegisterActivity, "✅ Registered successfully!", Toast.LENGTH_SHORT).show()
+
+                    // ✅ Save voter details in Firebase Realtime Database
+                    val uid = auth.currentUser?.uid ?: voterId // fallback if not logged in
+                    val voterData = mapOf(
+                        "uid" to uid,
+                        "name" to name,
+                        "voterId" to voterId,
+                        "photo" to "uploaded_via_api" // You can save actual photo URL if backend returns it
+                    )
+
+                    dbRef.child(uid).setValue(voterData)
+                        .addOnSuccessListener {
+                            Toast.makeText(this@RegisterActivity, "✅ Saved in Firebase", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(this@RegisterActivity, "⚠️ Firebase save failed: ${it.message}", Toast.LENGTH_LONG).show()
+                        }
+
                 } else {
-                    // Show backend error or HTTP error
                     val errorMsg = body?.error ?: resp.errorBody()?.string() ?: "Unknown error"
                     Toast.makeText(this@RegisterActivity, "❌ Error: $errorMsg", Toast.LENGTH_LONG).show()
                 }
@@ -94,13 +117,13 @@ class RegisterActivity : AppCompatActivity() {
         if (reqCode == PICK_IMAGE && resultCode == Activity.RESULT_OK) {
             val uri: Uri? = data?.data
             if (uri != null) {
-                imageFile = uriToFile(this, uri)   // ✅ always readable
-                imagePreview.setImageURI(uri)      // show preview
+                imageFile = uriToFile(this, uri)
+                imagePreview.setImageURI(uri)
             }
         }
     }
 
-    // ✅ Helper: Convert Uri -> File (copies into app cache)
+    // Convert Uri -> File
     private fun uriToFile(context: Context, uri: Uri): File {
         val inputStream = context.contentResolver.openInputStream(uri)
         val tempFile = File(context.cacheDir, "upload_image.jpg")

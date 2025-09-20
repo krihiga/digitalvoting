@@ -5,14 +5,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import retrofit2.*
-import retrofit2.converter.gson.GsonConverterFactory
+import com.google.firebase.database.*
 
 class ResultsActivity : AppCompatActivity() {
 
-    private lateinit var api: ApiService
     private lateinit var recyclerResults: RecyclerView
     private lateinit var adapter: ResultsAdapter
+    private val dbRef: DatabaseReference by lazy {
+        FirebaseDatabase.getInstance().getReference("votes")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,28 +25,36 @@ class ResultsActivity : AppCompatActivity() {
         adapter = ResultsAdapter()
         recyclerResults.adapter = adapter
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.busy-order.com/") // Flask server
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        api = retrofit.create(ApiService::class.java)
-
         loadResults()
     }
 
     private fun loadResults() {
-        api.getResults().enqueue(object : Callback<ResultsResponse> {
-            override fun onResponse(call: Call<ResultsResponse>, response: Response<ResultsResponse>) {
-                val body = response.body()
-                if (body?.ok == true && body.results != null) {
-                    adapter.setData(body.results)
+        dbRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (!snapshot.exists()) {
+                    Toast.makeText(this@ResultsActivity, "No votes yet", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                // Count votes by candidate
+                val resultsMap = mutableMapOf<String, Int>()
+
+                for (voteSnap in snapshot.children) {
+                    val vote = voteSnap.child("vote").getValue(String::class.java)
+                    if (!vote.isNullOrEmpty()) {
+                        resultsMap[vote] = (resultsMap[vote] ?: 0) + 1
+                    }
+                }
+
+                if (resultsMap.isNotEmpty()) {
+                    adapter.setData(resultsMap)
                 } else {
-                    Toast.makeText(this@ResultsActivity, "❌ Failed: ${body?.error}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ResultsActivity, "⚠️ No valid votes found", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<ResultsResponse>, t: Throwable) {
-                Toast.makeText(this@ResultsActivity, "⚠️ Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@ResultsActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }

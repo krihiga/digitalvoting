@@ -25,7 +25,7 @@ class ResultsActivity : AppCompatActivity() {
         recyclerResults.adapter = adapter
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.84.88.187:5000/") // Flask server
+            .baseUrl("https://digitalvoting.onrender.com") // Flask server
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         api = retrofit.create(ApiService::class.java)

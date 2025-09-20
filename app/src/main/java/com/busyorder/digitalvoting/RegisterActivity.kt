@@ -43,7 +43,7 @@ class RegisterActivity : AppCompatActivity() {
         imagePreview = findViewById(R.id.imagePreview)
 
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.84.88.187:5000/") // ✅ your system IP
+            .baseUrl("https://digitalvoting.onrender.com") // ✅ your system IP
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         api = retrofit.create(ApiService::class.java)
